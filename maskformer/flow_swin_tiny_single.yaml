@@ -1,0 +1,88 @@
+_BASE_: ../coco/instance-segmentation/swin/maskformer2_swin_tiny_bs16_50ep.yaml
+
+MODEL:
+  WEIGHTS: "https://dl.fbaipublicfiles.com/maskformer/mask2former/coco/instance/maskformer2_swin_tiny_bs16_50ep/model_final_86143f.pkl"
+  SEM_SEG_HEAD:
+    NUM_CLASSES: 5
+  MASK_FORMER:
+    TEST:
+      SEMANTIC_ON: False
+      INSTANCE_ON: True
+      PANOPTIC_ON: False
+
+DATASETS:
+  TRAIN: ("flowcoco_train",)
+  TEST: ()  # disable eval; no test set available
+
+SOLVER:
+  IMS_PER_BATCH: 8
+  BASE_LR: 0.00001
+  LR_SCHEDULER_NAME: "WarmupCosineLR"
+  NUM_EPOCHS: 20
+  GRADIENT_ACCUMULATION_STEPS: 4
+  MAX_ITER: 0  # overwritten in setup from NUM_EPOCHS and dataset size
+  STEPS: ()  # disable multi-step schedule when using cosine
+  WARMUP_ITERS: 0
+  AMP:
+    ENABLED: True
+
+OUTPUT_DIR: "output/flow_swin_tiny_merge"
+
+TEST:
+  EVAL_PERIOD: 0
+
+# cd Mask2Former-main
+# python train_net.py --config-file configs/flow/flow_swin_tiny_single.yaml --num-gpus 1
+# pip install fvcore
+
+# pip3 install -U Cython
+# pip3 install -U pycocotools
+# pip install 'git+https://github.com/facebookresearch/detectron2.git'
+
+
+# cd mask2former/modeling/pixel_decoder/ops
+# sh make.sh
+
+
+
+# (simlingo) xdu@xdu:~/演示资料/flowvqa-main/Mask2Former-main$ python train_net.py --config-file configs/flow/flow_swin_tiny_single.yaml --num-gpus 2
+# Command Line Args: Namespace(config_file='configs/flow/flow_swin_tiny_single.yaml', resume=False, eval_only=False, num_gpus=2, num_machines=1, machine_rank=0, dist_url='tcp://127.0.0.1:50152', opts=[])
+# [01/06 10:51:30 detectron2]: Rank of current process: 0. World size: 2
+# [01/06 10:51:30 detectron2]: Environment info:
+# -------------------------------  ----------------------------------------------------------------------------------------
+# sys.platform                     linux
+# Python                           3.10.13 (main, Sep 11 2023, 13:44:35) [GCC 11.2.0]
+# numpy                            1.23.5
+# detectron2                       0.6 @/home/xdu/anaconda3/envs/simlingo/lib/python3.10/site-packages/detectron2
+# Compiler                         GCC 12.3
+# CUDA compiler                    CUDA 12.1
+# detectron2 arch flags            8.6
+# DETECTRON2_ENV_MODULE            <not set>
+# PyTorch                          2.1.0+cu121 @/home/xdu/anaconda3/envs/simlingo/lib/python3.10/site-packages/torch
+# PyTorch debug build              False
+# torch._C._GLIBCXX_USE_CXX11_ABI  False
+# GPU available                    Yes
+# GPU 0,1                          NVIDIA GeForce RTX 3090 (arch=8.6)
+# Driver version                   580.95.05
+# CUDA_HOME                        /usr/local/cuda-12.1
+# Pillow                           10.2.0
+# torchvision                      0.16.0+cu121 @/home/xdu/anaconda3/envs/simlingo/lib/python3.10/site-packages/torchvision
+# torchvision arch flags           5.0, 6.0, 7.0, 7.5, 8.0, 8.6, 9.0
+# fvcore                           0.1.5.post20221221
+# iopath                           0.1.9
+# cv2                              4.12.0
+# -------------------------------  ----------------------------------------------------------------------------------------
+# PyTorch built with:
+#   - GCC 9.3
+#   - C++ Version: 201703
+#   - Intel(R) oneAPI Math Kernel Library Version 2022.2-Product Build 20220804 for Intel(R) 64 architecture applications
+#   - Intel(R) MKL-DNN v3.1.1 (Git Hash 64f6bcbcbab628e96f33a62c3e975f8535a7bde4)
+#   - OpenMP 201511 (a.k.a. OpenMP 4.5)
+#   - LAPACK is enabled (usually provided by MKL)
+#   - NNPACK is enabled
+#   - CPU capability usage: AVX2
+#   - CUDA Runtime 12.1
+#   - NVCC architecture flags: -gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_90,code=sm_90
+#   - CuDNN 8.9.2
+#   - Magma 2.6.1
+#   - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=12.1, CUDNN_VERSION=8.9.2, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=11 -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -DNDEBUG -DUSE_KINETO -DLIBKINETO_NOROCTRACER -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Werror=bool-operation -Wnarrowing -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=old-style-cast -Wno-invalid-partial-specialization -Wno-unused-private-field -Wno-aligned-allocation-unavailable -Wno-missing-braces -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_DISABLE_GPU_ASSERTS=ON, TORCH_VERSION=2.1.0, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=1, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
